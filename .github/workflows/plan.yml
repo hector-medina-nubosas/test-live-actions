@@ -39,11 +39,11 @@ jobs:
           path: test/
           if-no-files-found: error
 
-      - name: Set human readable plan to PR message.
+      - name: first.
         run: |
           awk '{printf "%s\\n", $0}' test/text.txt > test/text-clean.txt
 
-      - name: Set human readable plan to PR message.
+      - name: second.
         run: |
           curl -X POST "$REPO_BASE_URL/issues/${{ github.event.number }}/comments" \
                --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
