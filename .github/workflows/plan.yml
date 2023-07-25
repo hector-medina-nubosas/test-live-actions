@@ -1,0 +1,56 @@
+name: Terraform plan
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  TG_VERSION: '0.40.2'
+  REPO_BASE_URL: 'https://api.github.com/repos/hector-medina-nubosas/test-live-actions'
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  diff:
+    name: Check changes in repository.
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.environment.outputs.environment }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+  plan:
+    if: ${{ needs.diff.outputs.environment != 'no_changes' }}
+    name: Generate the terragrunt plan.
+    runs-on: ubuntu-latest
+    needs: diff
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Archive tgplan in artifact.
+        uses: actions/upload-artifact@v3
+        with:
+          name: test
+          path: test/
+          if-no-files-found: error
+
+      - name: Set human readable plan to PR message.
+        run: |
+          awk '{printf "%s\\n", $0}' test/text.txt > test/text-clean.txt
+          curl -X POST "$REPO_BASE_URL/issues/${{ github.event.number }}/comments" \
+               --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+               -d '{"body":  "````\n'"$(tr -d "\"\r" < test/text-clean.txt)"'\n````"}'
+
+      - name: Add labels to PR with the Workflow ID and environment.
+        run: |
+          curl -X PUT "$REPO_BASE_URL/issues/${{ github.event.number }}/labels" \
+               --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -d '{"labels" : ["${{ github.run_id }}"]}'
+          curl -X POST "$REPO_BASE_URL/issues/${{ github.event.number }}/labels" \
+               --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -d '{"labels" : ["test"]}'

@@ -1,0 +1,28 @@
+name: Terraform apply
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  apply:
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels[0].url, 'https') 
+    name: Terraform apply.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: check labels
+        run: |
+          echo ${{ github.event.pull_request.labels[0].name }}
+          echo ${{ github.event.pull_request.labels[1].name }}
+          echo ${{ github.event.pull_request.labels }}
+
+      - name: Download artifact
+        run: |
+          gh run download ${{ github.event.pull_request.labels[1].name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
