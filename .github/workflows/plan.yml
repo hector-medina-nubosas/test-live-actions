@@ -27,7 +27,7 @@ jobs:
     needs: diff
     defaults:
       run:
-        working-directory: ${{ needs.diff.outputs.environment }}
+        working-directory: .
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
