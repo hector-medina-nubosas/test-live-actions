@@ -15,6 +15,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: check labels
+        run: |
+          echo ${{ github.event.pull_request.labels[0].name }}
+          echo ${{ github.event.pull_request.labels[1].name }}
+          echo ${{ github.event.pull_request.labels }}
+
       - name: Download artifact
         run: |
           gh run download ${{ github.event.pull_request.labels[1].name }}
