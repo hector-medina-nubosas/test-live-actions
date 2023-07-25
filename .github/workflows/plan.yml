@@ -6,7 +6,7 @@ on:
 
 env:
   TG_VERSION: '0.40.2'
-  REPO_BASE_URL: 'https://api.github.com/repos/nubosas/infrastructure-live'
+  REPO_BASE_URL: 'https://api.github.com/repos/hector-medina-nubosas/test-live-actions'
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -41,10 +41,10 @@ jobs:
 
       - name: Set human readable plan to PR message.
         run: |
-          awk '{printf "%s\\n", $0}' tgplan-${{ github.event.number }}.txt > tgplan-${{ github.event.number }}-clean.txt
+          awk '{printf "%s\\n", $0}' test/text.txt > test/text-clean.txt
           curl -X POST "$REPO_BASE_URL/issues/${{ github.event.number }}/comments" \
                --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-               -d '{"body":  "````\n'"$(tr -d "\"\r" < test/text.txt"'\n````"}'
+               -d '{"body":  "````\n'"$(tr -d "\"\r" < test/text-clean.txt"'\n````"}'
 
       - name: Add labels to PR with the Workflow ID and environment.
         run: |
@@ -53,4 +53,4 @@ jobs:
               -d '{"labels" : ["${{ github.run_id }}"]}'
           curl -X POST "$REPO_BASE_URL/issues/${{ github.event.number }}/labels" \
                --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -d '{"labels" : ["${{ needs.diff.outputs.environment }}"]}'
+              -d '{"labels" : ["test"]}'
