@@ -42,6 +42,9 @@ jobs:
       - name: Set human readable plan to PR message.
         run: |
           awk '{printf "%s\\n", $0}' test/text.txt > test/text-clean.txt
+
+      - name: Set human readable plan to PR message.
+        run: |
           curl -X POST "$REPO_BASE_URL/issues/${{ github.event.number }}/comments" \
                --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                -d '{"body":  "````\n'"$(tr -d "\"\r" < test/text-clean.txt"'\n````"}'
